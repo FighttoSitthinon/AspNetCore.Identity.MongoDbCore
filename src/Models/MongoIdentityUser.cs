@@ -74,8 +74,8 @@ namespace AspNetCore.Identity.MongoDbCore.Models
     /// A document representing an <see cref="IdentityUser{TKey}"/> document.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
-     public class MongoIdentityUser<TKey> : IdentityUser<TKey>, IDocument<TKey>, IClaimHolder
-        where TKey : IEquatable<TKey>
+    public class MongoIdentityUser<TKey> : IdentityUser<TKey>, IDocument<TKey>, IClaimHolder
+       where TKey : IEquatable<TKey>
     {
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace AspNetCore.Identity.MongoDbCore.Models
         /// <summary>
         /// The role Ids of the roles that this user has.
         /// </summary>
-        public List<TKey> Roles { get; set; }
+        public List<string> Roles { get; set; }
         /// <summary>
         /// The list of <see cref="UserLoginInfo"/>s that this user has.
         /// </summary>
@@ -144,7 +144,7 @@ namespace AspNetCore.Identity.MongoDbCore.Models
             CreatedOn = DateTime.UtcNow;
             Claims = new List<MongoClaim>();
             Logins = new List<UserLoginInfo>();
-            Roles = new List<TKey>();
+            Roles = new List<string>();
             Tokens = new List<Token>();
             Id = IdGenerator.GetId<TKey>();
         }
@@ -167,10 +167,10 @@ namespace AspNetCore.Identity.MongoDbCore.Models
         /// </summary>
         /// <param name="roleId">The Id of the role you want to remove.</param>
         /// <returns>True if the removal was successful.</returns>
-        public virtual bool RemoveRole(TKey roleId)
+        public virtual bool RemoveRole(string roleId)
         {
             var roleClaim = Roles.FirstOrDefault(e => e.Equals(roleId));
-            if (roleClaim != null && !roleClaim.Equals(default(TKey)))
+            if (roleClaim != null && !roleClaim.Equals(default(string)))
             {
                 Roles.Remove(roleId);
                 return true;
@@ -183,9 +183,9 @@ namespace AspNetCore.Identity.MongoDbCore.Models
         /// </summary>
         /// <param name="roleId">The Id of the role you want to add.</param>
         /// <returns>True if the addition was successful.</returns>
-        public virtual bool AddRole(TKey roleId)
+        public virtual bool AddRole(string roleId)
         {
-            if(roleId == null || roleId.Equals(default(TKey)))
+            if (roleId == null || roleId.Equals(default(string)))
             {
                 throw new ArgumentNullException(nameof(roleId));
             }
@@ -216,7 +216,7 @@ namespace AspNetCore.Identity.MongoDbCore.Models
             {
                 return false;
             }
-            
+
             Logins.Add(new UserLoginInfo(userLoginInfo.LoginProvider, userLoginInfo.ProviderKey, userLoginInfo.ProviderDisplayName));
             return true;
         }
@@ -358,7 +358,7 @@ namespace AspNetCore.Identity.MongoDbCore.Models
         /// <returns>True if the removal was successful.</returns>
         public bool RemoveUserToken<TUserToken>(TUserToken token) where TUserToken : IdentityUserToken<TKey>
         {
-            var exists = Tokens.FirstOrDefault(e => e.LoginProvider == token.LoginProvider 
+            var exists = Tokens.FirstOrDefault(e => e.LoginProvider == token.LoginProvider
                                                  && e.Name == token.Name);
             if (exists == null)
             {
